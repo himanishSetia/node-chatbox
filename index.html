@@ -1,0 +1,171 @@
+<html>
+
+<head>
+    <title>
+        SocketIO
+    </title>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
+        crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+    <script>
+        $(".chat").css("bottom", "-262px");
+        var chatting = false
+
+        var socket = io();
+        var connClients = 0
+        var name = prompt("Enter your name.")
+        socket.emit('user', name)
+        sessionStorage.setItem('name', name);
+
+        socket.on('broadcast', function (msg) {
+            // console.log(msg + " clients connected.")
+            $('#connClients').html('<b class="rel">' + msg + '</b>');
+            // connClients = msg
+        })
+
+        socket.on('disconnected', function (msg) {
+            console.log(msg + " clients disconnected.")
+            $('#connClients').html('<b class="rel">' + msg + '</b>');
+            // connClients = msg
+        })
+
+        socket.on('join', function (msg) {
+            console.log(msg + " joined.")
+            $('#incomingChatMessages').append($('<ul class="joining">' + msg + ' joined</ul>'));
+        })
+
+
+        socket.on('message', function (msg) {
+            console.log(msg + " joined.")
+            $('#incomingChatMessages').append($('<ul class="msg"><b>' + msg.name + ':</b> &nbsp' + msg.message + '</ul>'));
+        })
+
+        function sendMsg() {
+            var objDiv = document.getElementById("chatColor");
+            objDiv.scrollTop = objDiv.scrollHeight;
+            var message = document.getElementById('outgoingChatMessage').value;
+            console.log("Message ", message)
+            socket.emit('message', { "message": message, "name": name })
+            document.getElementById('outgoingChatMessage').value = ""
+
+        }
+
+        function openChat() {
+            if (chatting) {
+                // $(".chat").css("bottom", "-262px");
+                $(".chat").animate({ bottom: "-262px" });
+            } else {
+                // $(".chat").css("bottom", "0px");
+                $(".chat").animate({ bottom: "-0px" });
+            }
+            chatting = !chatting
+
+        }
+
+
+
+
+    </script>
+</head>
+
+
+<body>
+    <style>
+        #connClients {
+            width: 20px;
+            height: 20px;
+            color: black;
+            background: gray;
+            border-radius: 50%;
+            float: right;
+            margin: 5px 5px;
+            position: relative;
+        }
+
+        .rel {
+            position: absolute;
+            margin: -3px 0px 0px 5px;
+        }
+
+        .joining {
+            background: #6d9698;
+            width: 218px;
+            border-radius: 50px;
+            padding: 0 16px 0 25px;
+            margin-bottom: 2px;
+            color: papayawhip;
+        }
+
+        .msg {
+            background: #d5d5d5;
+            width: 218px;
+            margin-bottom: 2px;
+            border-radius: 50px;
+            word-wrap: break-word;
+            padding: 0 30px 0px 33px;
+        }
+
+        .chat {
+            width: 300px;
+
+            height: 310px;
+
+            bottom: -262px;
+            position: fixed;
+            right: 0;
+        }
+
+        #outgoingChatMessage {
+            border-radius: 50px;
+            bottom: 5px;
+            position: absolute;
+        }
+
+        #incomingChatMessages {
+            padding-top: 21px;
+        }
+
+        #chatColor {
+            overflow: scroll;
+            width: 300px;
+            border-radius: 10px;
+            height: 235px;
+            background: beige;
+        }
+
+        .chatIcon {
+            float: right;
+            margin: 0px 20px 5px 15px;
+        }
+    </style>
+
+    <div class="chat">
+
+        <div class="">
+            <div class="">
+                <img class="chatIcon" height="42" onclick="openChat()" width="42" src="https://apiindiablob.blob.core.windows.net/31-d9086e02f8ee9d46b719e18/chatIcon.png"
+                />
+            </div>
+        </div>
+        <div class="box">
+            <div id="chatColor">
+                <div id="connClients"></div>
+                <ul id="incomingChatMessages"></ul>
+                <br />
+
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control" id="outgoingChatMessage" onkeydown="if (event.keyCode == 13) sendMsg()">
+            </div>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    window.setInterval(function () {
+        var elem = document.getElementById('chatColor');
+        elem.scrollTop = elem.scrollHeight;
+    }, 1000);
+</script>
+
+</html>
